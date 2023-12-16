@@ -1,0 +1,40 @@
+services:
+  app:
+    build: ./frontend
+    container_name: frontend
+    tty: true
+    working_dir: /usr/src/app
+    volumes:
+      - ./frontend:/usr/src/app
+    command: sh -c "yarn start"
+    ports:
+      - "3000:3000"
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_USER: ${ROOTUSER}
+      MYSQL_ROOT_PASSWORD: ${ROOTPASS}
+      MYSQL_DATABASE: ${DATABASE}
+      MYSQL_USER: ${USERNAME}
+      MYSQL_PASSWORD: ${USERPASS}
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+    env_file:
+      - .env
+    container_name: db
+    ports:
+      - 3306:3306
+
+  go:
+    build: ./backend
+    volumes:
+      - ./backend/src:/backend/src
+    container_name: backend
+    tty: true
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
